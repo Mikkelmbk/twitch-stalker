@@ -2,9 +2,10 @@
   "name": "twitch-stalker",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "bot.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./src/bot.js"
   },
   "repository": {
     "type": "git",
@@ -18,6 +19,8 @@
   },
   "homepage": "https://github.com/Mikkelmbk/twitch-stalker#readme",
   "dependencies": {
+    "discord.js": "^13.2.0",
+    "dotenv": "^10.0.0",
     "puppeteer": "^10.4.0"
   }
 }
