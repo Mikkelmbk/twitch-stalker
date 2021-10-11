@@ -27,7 +27,10 @@ client.on("messageCreate", async (message) => {
         twitchURL = `https://www.twitch.tv/${message.content.split(" ")[1]}`;
         userToStalk = message.content.split(" ")[2];
 
-        const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({
+            headless:true,
+            args: ['--no-sandbox','--disable-setuid-sandbox']
+        });
         const page = await browser.newPage();
         await page.setViewport({
             width: 1800,
