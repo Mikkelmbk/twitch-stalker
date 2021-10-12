@@ -7,7 +7,7 @@ const client = new DiscordJS.Client({
         DiscordJS.Intents.FLAGS.GUILD_MESSAGES,
     ]
 });
-const prefix = "!ts";
+const prefix = "!tss";
 let twitchURL = "";
 let userToStalk = "";
 let staticUsers = [
@@ -53,22 +53,31 @@ client.on("messageCreate", async (message) => {
             }).then(async () => {
                 setTimeout(async () => {
                     await page.waitForSelector("div.chat-shell__expanded");
-                    const viewers = await page.$$eval('button.chat-viewers-list__button', (divs) => divs.map(div => div.textContent));
+                    let viewers = await page.$$eval('button.chat-viewers-list__button', (divs) => divs.map(div => div.textContent));
                     await browser.close();
 
 
-
-                    viewers.forEach((viewer) => {
-                        staticUsers.forEach((user) => {
-                            if (viewer.trim() === user.name.trim()) {
-                                user.watching = true;
-                            }
-                            else {
-                                user.watching = false;
-                            }
+                    console.log(viewers);
+                    if(viewers.length > 0){
+                        console.log(`The length of the viewers array was ${viewers.length}, so we are comparing with the staticUser array to see if someone is watching ${message.content.split(" ")[2]}.`);
+                        viewers.forEach((viewer) => {
+                            staticUsers.forEach((user) => {
+                                if (viewer.trim() === user.name.trim()) {
+                                    user.watching = true;
+                                }
+                                else{
+                                    user.watching = false;
+                                }
+                            })
                         })
-                    })
-
+                    }
+                    else{
+                        console.log(`The length of the viewers array was ${viewers.length}, so no user was found.`);
+                        staticUsers.forEach((user)=>{
+                            user.watching = false;
+                        })
+                    }
+                    
                     // staticUsers.some((user) => user.name === userToStalk.toLowerCase());
 
                     if (staticUsers.some((user) => user.name === userToStalk.toLowerCase())) {
