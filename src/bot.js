@@ -22,14 +22,16 @@ client.on("ready", () => {
     console.log("Bot is ready");
 });
 
+
+
 client.on("messageCreate", async (message) => {
-    if (message.content.split(" ")[0] === prefix) {
-        twitchURL = `https://www.twitch.tv/${message.content.split(" ")[1]}`;
-        userToStalk = message.content.split(" ")[2];
+    if (message.content.split(" ")[0] === prefix && message.content.split(" ")[1] === "stalk" && message.content.split(" ")[2] && message.content.split(" ")[3]) {
+        twitchURL = `https://www.twitch.tv/${message.content.split(" ")[2]}`;
+        userToStalk = message.content.split(" ")[3];
 
         const browser = await puppeteer.launch({
-            headless:true,
-            args: ['--no-sandbox','--disable-setuid-sandbox']
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
         const page = await browser.newPage();
         await page.setViewport({
@@ -61,6 +63,9 @@ client.on("messageCreate", async (message) => {
                             if (viewer.trim() === user.name.trim()) {
                                 user.watching = true;
                             }
+                            else {
+                                user.watching = false;
+                            }
                         })
                     })
 
@@ -70,12 +75,12 @@ client.on("messageCreate", async (message) => {
                         staticUsers.forEach((user) => {
                             if (user.name === userToStalk.toLowerCase() && user.watching === true) {
                                 message.reply({
-                                    content: `${user.name} is watching ${message.content.split(" ")[1]}`,
+                                    content: `${user.name} is watching ${message.content.split(" ")[2]}`,
                                 });
                             }
                             else if (user.name === userToStalk.toLowerCase() && user.watching === false) {
                                 message.reply({
-                                    content: `${user.name} is not watching ${message.content.split(" ")[1]}`,
+                                    content: `${user.name} is not watching ${message.content.split(" ")[2]}`,
                                 });
                             }
                         })
@@ -85,12 +90,18 @@ client.on("messageCreate", async (message) => {
                             content: `"${userToStalk}" is not a king, try again`,
                         })
                     }
-
                 }, 500);
             });
 
 
 
+    }
+
+    if (message.content.split(" ")[0] === prefix && message.content.split(" ")[1] === "add" && message.content.split(" ")[2]) {
+        staticUsers.push({
+            name: message.content.split(" ")[2].toLowerCase(),
+            watching: false,
+        })
     }
 })
 
