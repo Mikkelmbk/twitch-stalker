@@ -17,6 +17,8 @@ let staticUsers = [
     { name: "benbin0", watching: false },
     { name: "eggdoodle", watching: false },
     { name: "twistedjosh", watching: false },
+    { name: "yaromiss", watching: false },
+    { name: "yaromisss", watching: false },
 ];
 client.on("ready", () => {
     console.log("Bot is ready");
@@ -45,7 +47,7 @@ client.on("messageCreate", async (message) => {
         await page.click("div.stream-chat-header button.fNzXyu");
         await page.waitForSelector("input.bCTkss");
 
-        page.waitForTimeout(500)
+        page.waitForTimeout(1000)
             .then(async () => {
                 await page.focus("input.bCTkss");
                 await page.keyboard.type(userToStalk);
@@ -57,7 +59,7 @@ client.on("messageCreate", async (message) => {
                     await browser.close();
 
 
-                    console.log(viewers);
+                    console.log("Viewers: ",viewers);
                     if(viewers.length > 0){
                         console.log(`The length of the viewers array was ${viewers.length}, so we are comparing with the staticUser array to see if someone is watching ${message.content.split(" ")[2]}.`);
                         viewers.forEach((viewer) => {
@@ -84,12 +86,12 @@ client.on("messageCreate", async (message) => {
                         staticUsers.forEach((user) => {
                             if (user.name === userToStalk.toLowerCase() && user.watching === true) {
                                 message.reply({
-                                    content: `${user.name} is watching ${message.content.split(" ")[2]}`,
+                                    content: `${user.name} is watching ${twitchURL}`,
                                 });
                             }
                             else if (user.name === userToStalk.toLowerCase() && user.watching === false) {
                                 message.reply({
-                                    content: `${user.name} is not watching ${message.content.split(" ")[2]}`,
+                                    content: `${user.name} is not watching ${twitchURL}`,
                                 });
                             }
                         })
