@@ -46,11 +46,41 @@ let predefinedStreams = [
         user: "",
         watching: false
     },
+    {
+        url: "https://www.twitch.tv/woohankyung",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/wowyoming",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/jinnytty",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/quin69",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/yeopu",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/saddummy",
+        user: "",
+        watching: false
+    },
 ];
+// Potential additions: mozzimanduv, youjell_, maesiri, bomi4902, gilyoung8, kingtooth96, radada_, wjl9908, shine_eh, xchocobars, jjolbi1987
 client.on("ready", () => {
     console.log("Bot is ready");
 });
-
 
 
 client.on("messageCreate", async (message) => {
