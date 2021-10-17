@@ -106,7 +106,7 @@ client.on("messageCreate", async (message) => {
             await page.click("div.stream-chat-header button.fNzXyu");
             await page.waitForSelector("input.bCTkss");
 
-            page.waitForTimeout(1000)
+            page.waitForTimeout(1250)
                 .then(async () => {
                     await page.focus("input.bCTkss");
                     await page.keyboard.type(userToStalk);
@@ -233,7 +233,7 @@ async function multiStreamChecker(message, msg) {
         await page.click("div.stream-chat-header button.fNzXyu");
         await page.waitForSelector("input.bCTkss");
 
-        page.waitForTimeout(1000)
+        page.waitForTimeout(1250)
             .then(async () => {
                 await page.focus("input.bCTkss");
                 await page.keyboard.type(msg[2]);
