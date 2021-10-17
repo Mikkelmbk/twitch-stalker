@@ -8,8 +8,6 @@ const client = new DiscordJS.Client({
     ]
 });
 const prefix = "!ts";
-let twitchURL = "";
-let userToStalk = "";
 let staticUsers = [
     { name: "mbk_official", watching: false },
     { name: "yarrgen", watching: false },
@@ -20,6 +18,35 @@ let staticUsers = [
     { name: "yaromiss", watching: false },
     { name: "yaromisss", watching: false },
 ];
+
+
+let predefinedStreams = [
+    {
+        url: "https://www.twitch.tv/sooflower",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/berry0314",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/velvet_7",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/parkhael",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/luna_ddd",
+        user: "",
+        watching: false
+    },
+];
 client.on("ready", () => {
     console.log("Bot is ready");
 });
@@ -27,10 +54,138 @@ client.on("ready", () => {
 
 
 client.on("messageCreate", async (message) => {
-    if (message.content.split(" ")[0] === prefix && message.content.split(" ")[1] === "stalk" && message.content.split(" ")[2] && message.content.split(" ")[3]) {
-        twitchURL = `https://www.twitch.tv/${message.content.split(" ")[2]}`;
-        userToStalk = message.content.split(" ")[3];
+    let msg = message.content.split(" ");
+    try {
+        if (!message.author.bot && msg[0] === prefix && msg[1] === "stalk" && msg[2] && msg[3]) {
+            let twitchURL = `https://www.twitch.tv/${msg[2]}`;
+            let userToStalk = msg[3];
 
+            const browser = await puppeteer.launch({
+                headless: true,
+                args: ['--no-sandbox', '--disable-setuid-sandbox']
+            });
+            const page = await browser.newPage();
+            await page.setViewport({
+                width: 1800,
+                height: 1000,
+                deviceScaleFactor: 1,
+            });
+            await page.goto(twitchURL, { waitUntil: 'networkidle2' });
+            await page.waitForSelector("div.chat-line__status");
+            await page.waitForSelector("div.stream-chat-header button.fNzXyu");
+            await page.click("div.stream-chat-header button.fNzXyu");
+            await page.waitForSelector("input.bCTkss");
+
+            page.waitForTimeout(1000)
+                .then(async () => {
+                    await page.focus("input.bCTkss");
+                    await page.keyboard.type(userToStalk);
+                    console.log("typing done");
+                }).then(async () => {
+                    setTimeout(async () => {
+                        await page.waitForSelector("div.chat-shell__expanded");
+                        let viewers = await page.$$eval('button.chat-viewers-list__button', (divs) => divs.map(div => div.textContent));
+                        await browser.close();
+
+
+                        console.log("Viewers: ", viewers);
+                        if (viewers.length > 0) {
+                            console.log(`The length of the viewers array was ${viewers.length}, so we are comparing with the staticUser array to see if someone is watching ${msg[2]}.`);
+                            viewers.forEach((viewer) => {
+                                staticUsers.forEach((user) => {
+                                    if (viewer.trim() === user.name.trim()) {
+                                        user.watching = true;
+                                    }
+                                    else {
+                                        user.watching = false;
+                                    }
+                                })
+                            })
+                        }
+                        else {
+                            console.log(`The length of the viewers array was ${viewers.length}, so no user was found.`);
+                            staticUsers.forEach((user) => {
+                                user.watching = false;
+                            })
+                        }
+
+
+                        if (staticUsers.some((user) => user.name === userToStalk.toLowerCase())) {
+                            staticUsers.forEach((user) => {
+                                if (user.name === userToStalk.toLowerCase() && user.watching === true) {
+                                    message.reply({
+                                        content: `${user.name} is watching ${twitchURL}`,
+                                    });
+                                }
+                                else if (user.name === userToStalk.toLowerCase() && user.watching === false) {
+                                    message.reply({
+                                        content: `${user.name} is not watching ${msg[2]}`,
+                                    });
+                                }
+                            })
+                        }
+                        else {
+                            message.reply({
+                                content: `"${userToStalk}" is not a recognized username, add the user by typing "!ts add ${userToStalk}"`,
+                            })
+                        }
+                    }, 500);
+                });
+
+        }
+
+    } catch (error) {
+        message.reply({
+            content: `https://www.twitch.tv/${msg[2]} does not exist, try again.`
+        })
+    }
+    if (!message.author.bot && msg[0] === prefix && msg[1] === "add" && msg[2]) {
+        staticUsers.push({
+            name: msg[2].toLowerCase(),
+            watching: false,
+        });
+    }
+
+    if (!message.author.bot && msg[0] === prefix && msg[1] === "status" && msg[2]) {
+
+        multiStreamChecker(message, msg);
+
+    }
+
+    if (!message.author.bot && msg[0] === prefix && msg[1] === "addStream" && msg[2]) {
+        let urlFormatted = msg[2].toLowerCase().split("/").pop();
+        if(predefinedStreams.every(stream => stream.url !== `https://www.twitch.tv/${urlFormatted}`)){
+            predefinedStreams.push({
+                url: `https://www.twitch.tv/${urlFormatted}`,
+                user: "",
+                watching: false
+            });
+            message.reply({
+                content: "Stream successfully added to the observer list."
+            })
+        }
+        else{
+            message.reply({
+                content:"That stream is already being observed"
+            });
+        }
+        console.log(predefinedStreams);
+    }
+
+    if(!message.author.bot && msg[0] === prefix && msg[1] === "help"){
+        message.reply({
+            content: "!ts stalk <streamname> <username> | !ts status <username> | !ts add <username> | !ts addStream <streamname>"
+        })
+    }
+})
+
+async function multiStreamChecker(message, msg) {
+
+    predefinedStreams.forEach((stream) => {
+        stream.user = msg[2];
+    })
+
+    for (let i = 0; i < predefinedStreams.length; i++) { // for begins
         const browser = await puppeteer.launch({
             headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -41,7 +196,8 @@ client.on("messageCreate", async (message) => {
             height: 1000,
             deviceScaleFactor: 1,
         });
-        await page.goto(twitchURL, { waitUntil: 'networkidle2' });
+
+        await page.goto(predefinedStreams[i].url, { waitUntil: 'networkidle2' });
         await page.waitForSelector("div.chat-line__status");
         await page.waitForSelector("div.stream-chat-header button.fNzXyu");
         await page.click("div.stream-chat-header button.fNzXyu");
@@ -50,71 +206,47 @@ client.on("messageCreate", async (message) => {
         page.waitForTimeout(1000)
             .then(async () => {
                 await page.focus("input.bCTkss");
-                await page.keyboard.type(userToStalk);
+                await page.keyboard.type(msg[2]);
                 console.log("typing done");
             }).then(async () => {
                 setTimeout(async () => {
                     await page.waitForSelector("div.chat-shell__expanded");
                     let viewers = await page.$$eval('button.chat-viewers-list__button', (divs) => divs.map(div => div.textContent));
-                    await browser.close();
-
-
-                    console.log("Viewers: ",viewers);
-                    if(viewers.length > 0){
-                        console.log(`The length of the viewers array was ${viewers.length}, so we are comparing with the staticUser array to see if someone is watching ${message.content.split(" ")[2]}.`);
-                        viewers.forEach((viewer) => {
-                            staticUsers.forEach((user) => {
-                                if (viewer.trim() === user.name.trim()) {
-                                    user.watching = true;
-                                }
-                                else{
-                                    user.watching = false;
-                                }
-                            })
-                        })
-                    }
-                    else{
-                        console.log(`The length of the viewers array was ${viewers.length}, so no user was found.`);
-                        staticUsers.forEach((user)=>{
-                            user.watching = false;
-                        })
-                    }
-                    
-                    // staticUsers.some((user) => user.name === userToStalk.toLowerCase());
-
-                    if (staticUsers.some((user) => user.name === userToStalk.toLowerCase())) {
-                        staticUsers.forEach((user) => {
-                            if (user.name === userToStalk.toLowerCase() && user.watching === true) {
-                                message.reply({
-                                    content: `${user.name} is watching ${twitchURL}`,
-                                });
-                            }
-                            else if (user.name === userToStalk.toLowerCase() && user.watching === false) {
-                                message.reply({
-                                    content: `${user.name} is not watching ${twitchURL}`,
-                                });
-                            }
-                        })
+                    let predefUser = predefinedStreams[i].user.trim()
+                    if (viewers.some((user) => user.toLowerCase() === predefUser.toLowerCase())) {
+                        console.log(`atleast one viewer is the same as ${predefUser}`);
+                        predefinedStreams[i].watching = true;
                     }
                     else {
-                        message.reply({
-                            content: `"${userToStalk}" is not a king, try again`,
-                        })
+                        console.log(`no viewers are the same as ${predefUser}`);
+                        predefinedStreams[i].watching = false;
                     }
+                    await browser.close();
+                    console.log(viewers);
+                    if (i == predefinedStreams.length - 1) {
+                        console.log(predefinedStreams);
+                        let statusToPrint = "";
+                        if(predefinedStreams.some((stream) => stream.watching === true)){
+                            statusToPrint = `${predefUser} is currently watching the following streams: `;
+                            predefinedStreams.forEach((item) => {
+                                if (item.watching) {
+                                    statusToPrint += `${item.url}, `;
+                                }
+                            })
+                        }
+                        else{
+                            statusToPrint = `${predefUser} is currently watching no streams`;
+                        }
+
+                        message.reply({
+                            content: statusToPrint,
+                        })
+                    };
                 }, 500);
             });
 
-
-
-    }
-
-    if (message.content.split(" ")[0] === prefix && message.content.split(" ")[1] === "add" && message.content.split(" ")[2]) {
-        staticUsers.push({
-            name: message.content.split(" ")[2].toLowerCase(),
-            watching: false,
-        })
-    }
-})
+    } // for ends
+}
 
 client.login(process.env.DISCORDJS_BOT_TOKEN);
 
