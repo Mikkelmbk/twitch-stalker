@@ -7,7 +7,7 @@ const client = new DiscordJS.Client({
         DiscordJS.Intents.FLAGS.GUILD_MESSAGES,
     ]
 });
-const prefix = "!ts";
+const prefix = "!tss";
 let staticUsers = [
     { name: "mbk_official", watching: false },
     { name: "yarrgen", watching: false },
@@ -27,6 +27,11 @@ let predefinedStreams = [
         watching: false
     },
     {
+        url: "https://www.twitch.tv/maesiri",
+        user: "",
+        watching: false
+    },
+    {
         url: "https://www.twitch.tv/berry0314",
         user: "",
         watching: false
@@ -38,6 +43,11 @@ let predefinedStreams = [
     },
     {
         url: "https://www.twitch.tv/parkhael",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/gilyoung8",
         user: "",
         watching: false
     },
@@ -62,6 +72,21 @@ let predefinedStreams = [
         watching: false
     },
     {
+        url: "https://www.twitch.tv/kingtooth96",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/radada_",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/wjl9908",
+        user: "",
+        watching: false
+    },
+    {
         url: "https://www.twitch.tv/quin69",
         user: "",
         watching: false
@@ -77,9 +102,15 @@ let predefinedStreams = [
         watching: false
     },
 ];
-// Potential additions: mozzimanduv, youjell_, maesiri, bomi4902, gilyoung8, kingtooth96, radada_, wjl9908, shine_eh, xchocobars, jjolbi1987
+let running = false;
+// Potential additions: mozzimanduv, youjell_, bomi4902, shine_eh, xchocobars, jjolbi1987
 client.on("ready", () => {
     console.log("Bot is ready");
+    let msg = "!ts status yarrgen".split(" ");
+    // multiStreamChecker(client, msg, "automatic");
+    setInterval(()=>{
+        multiStreamChecker(client, msg, "automatic");
+    }, 1000 * 60 * 60);
 });
 
 
@@ -178,7 +209,14 @@ client.on("messageCreate", async (message) => {
 
     if (!message.author.bot && msg[0] === prefix && msg[1] === "status" && msg[2]) {
 
-        multiStreamChecker(message, msg);
+        if(running){
+            message.reply({
+                content: "Bot is currently busy try again in a few minutes",
+            })
+        }
+        else{
+            multiStreamChecker(message, msg, "manual");
+        }
 
     }
 
@@ -209,8 +247,8 @@ client.on("messageCreate", async (message) => {
     }
 })
 
-async function multiStreamChecker(message, msg) {
-
+async function multiStreamChecker(message, msg, trigger) {
+    running = true;
     predefinedStreams.forEach((stream) => {
         stream.user = msg[2];
     })
@@ -268,9 +306,15 @@ async function multiStreamChecker(message, msg) {
                             statusToPrint = `${predefUser} is currently watching no streams`;
                         }
 
-                        message.reply({
-                            content: statusToPrint,
-                        })
+                        if(trigger === "manual"){
+                            message.reply({
+                                content: statusToPrint,
+                            })
+                        }
+                        else if(trigger === "automatic"){
+                            message.channels.cache.get("861976278022619137").send(statusToPrint);
+                        }
+                        running = false;
                     };
                 }, 500);
             });
