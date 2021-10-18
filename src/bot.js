@@ -27,6 +27,36 @@ let predefinedStreams = [
         watching: false
     },
     {
+        url: "https://www.twitch.tv/az9403",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/sunha_cos",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/kkoduengeo",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/haena_0714",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/cherria7",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/akajian",
+        user: "",
+        watching: false
+    },
+    {
         url: "https://www.twitch.tv/maesiri",
         user: "",
         watching: false
@@ -58,6 +88,31 @@ let predefinedStreams = [
     },
     {
         url: "https://www.twitch.tv/woohankyung",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/haxxnini",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/admiralbulldog",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/gksmf0f0",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/singsing",
+        user: "",
+        watching: false
+    },
+    {
+        url: "https://www.twitch.tv/pinkholic93",
         user: "",
         watching: false
     },
@@ -103,7 +158,6 @@ let predefinedStreams = [
     },
 ];
 let running = false;
-// Potential additions: mozzimanduv, youjell_, bomi4902, shine_eh, xchocobars, jjolbi1987
 client.on("ready", () => {
     console.log("Bot is ready");
     let msg = "!ts status yarrgen".split(" ");
