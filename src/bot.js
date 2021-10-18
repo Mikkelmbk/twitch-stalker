@@ -7,7 +7,7 @@ const client = new DiscordJS.Client({
         DiscordJS.Intents.FLAGS.GUILD_MESSAGES,
     ]
 });
-const prefix = "!tss";
+const prefix = "!ts";
 let staticUsers = [
     { name: "mbk_official", watching: false },
     { name: "yarrgen", watching: false },
