@@ -32,6 +32,11 @@ let predefinedStreams = [
         watching: false
     },
     {
+        url: "https://www.twitch.tv/vera_zzang",
+        user: "",
+        watching: false
+    },
+    {
         url: "https://www.twitch.tv/sunha_cos",
         user: "",
         watching: false
@@ -158,14 +163,14 @@ let predefinedStreams = [
     },
 ];
 let running = false;
+let interval;
+let min = 60;
 client.on("ready", () => {
     console.log("Bot is ready");
     let msg = "!ts status yarrgen".split(" ");
-    // multiStreamChecker(client, msg, "automatic");
-    setInterval(()=>{
-        multiStreamChecker(client, msg, "automatic");
-    }, 1000 * 60 * 60);
+    interval = setInterval(()=>{ multiStreamChecker(client, msg, "automatic") }, 1000 * 60 * min);
 });
+
 
 
 client.on("messageCreate", async (message) => {
@@ -299,6 +304,30 @@ client.on("messageCreate", async (message) => {
             content: "!ts stalk <streamname> <username> | !ts status <username> | !ts add <username> | !ts addStream <streamname>"
         })
     }
+
+    if(!message.author.bot && msg[0] === prefix && msg[1] === "interval" && msg[2]){
+        if(isNaN(parseInt(msg[2]))){
+            message.reply({
+                content: `Wrong syntax, here is an example: "!ts interval 75" for the bot to run every 75 minutes`,
+            });
+        }
+        else{
+            min = msg[2];
+            if(min < 45){
+                message.reply({
+                    content:"The bot can not run more often than every 45 minutes." 
+                })
+            }
+            else{
+                clearInterval(interval);
+                interval = setInterval(()=>{ multiStreamChecker(message, msg, "automatic") }, 1000 * 60 * min);
+                message.reply({
+                    content:`Bot is running every ${min} minutes from now`,
+                })
+            }
+        }
+
+    }
 })
 
 async function multiStreamChecker(message, msg, trigger) {
@@ -355,19 +384,25 @@ async function multiStreamChecker(message, msg, trigger) {
                                     statusToPrint += `${item.url}, `;
                                 }
                             })
+                            if(trigger === "manual"){
+                                message.reply({
+                                    content: statusToPrint,
+                                })
+                            }
+                            else if(trigger === "automatic"){
+                                message.channels.cache.get("861976278022619137").send(statusToPrint);
+                            }
                         }
                         else{
-                            statusToPrint = `${predefUser} is currently watching no streams`;
+                            statusToPrint = `${predefUser} is currently not watching any streams`;
+                            if(trigger === "manual"){
+                                message.reply({
+                                    content: statusToPrint,
+                                })
+                            }
                         }
 
-                        if(trigger === "manual"){
-                            message.reply({
-                                content: statusToPrint,
-                            })
-                        }
-                        else if(trigger === "automatic"){
-                            message.channels.cache.get("861976278022619137").send(statusToPrint);
-                        }
+                        
                         running = false;
                     };
                 }, 500);
