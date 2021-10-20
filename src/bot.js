@@ -163,12 +163,16 @@ let predefinedStreams = [
     },
 ];
 let running = false;
-let interval;
-let min = 60;
+// let interval;
+// let min = 60;
 client.on("ready", () => {
     console.log("Bot is ready");
     let msg = "!ts status yarrgen".split(" ");
-    interval = setInterval(()=>{ multiStreamChecker(client, msg, "automatic") }, 1000 * 60 * min);
+    // interval = setInterval(()=>{ multiStreamChecker(client, msg, "automatic") }, 1000 * 60 * min);
+    setInterval(() => {
+        console.log("Hourly interval has started");
+        multiStreamChecker(client, msg, "automatic");
+    }, 1000 * 60 * 60);
 });
 
 
@@ -268,12 +272,12 @@ client.on("messageCreate", async (message) => {
 
     if (!message.author.bot && msg[0] === prefix && msg[1] === "status" && msg[2]) {
 
-        if(running){
+        if (running) {
             message.reply({
                 content: "Bot is currently busy try again in a few minutes",
             })
         }
-        else{
+        else {
             multiStreamChecker(message, msg, "manual");
         }
 
@@ -281,7 +285,7 @@ client.on("messageCreate", async (message) => {
 
     if (!message.author.bot && msg[0] === prefix && msg[1] === "addStream" && msg[2]) {
         let urlFormatted = msg[2].toLowerCase().split("/").pop();
-        if(predefinedStreams.every(stream => stream.url !== `https://www.twitch.tv/${urlFormatted}`)){
+        if (predefinedStreams.every(stream => stream.url !== `https://www.twitch.tv/${urlFormatted}`)) {
             predefinedStreams.push({
                 url: `https://www.twitch.tv/${urlFormatted}`,
                 user: "",
@@ -291,43 +295,43 @@ client.on("messageCreate", async (message) => {
                 content: "Stream successfully added to the observer list."
             })
         }
-        else{
+        else {
             message.reply({
-                content:"That stream is already being observed"
+                content: "That stream is already being observed"
             });
         }
         console.log(predefinedStreams);
     }
 
-    if(!message.author.bot && msg[0] === prefix && msg[1] === "help"){
+    if (!message.author.bot && msg[0] === prefix && msg[1] === "help") {
         message.reply({
             content: "!ts stalk <streamname> <username> | !ts status <username> | !ts add <username> | !ts addStream <streamname>"
         })
     }
 
-    if(!message.author.bot && msg[0] === prefix && msg[1] === "interval" && msg[2]){
-        if(isNaN(parseInt(msg[2]))){
-            message.reply({
-                content: `Wrong syntax, here is an example: "!ts interval 75" for the bot to run every 75 minutes`,
-            });
-        }
-        else{
-            min = msg[2];
-            if(min < 45){
-                message.reply({
-                    content:"The bot can not run more often than every 45 minutes." 
-                })
-            }
-            else{
-                clearInterval(interval);
-                interval = setInterval(()=>{ multiStreamChecker(message, msg, "automatic") }, 1000 * 60 * min);
-                message.reply({
-                    content:`Bot is running every ${min} minutes from now`,
-                })
-            }
-        }
+    // if(!message.author.bot && msg[0] === prefix && msg[1] === "interval" && msg[2]){
+    //     if(isNaN(parseInt(msg[2]))){
+    //         message.reply({
+    //             content: `Wrong syntax, here is an example: "!ts interval 75" for the bot to run every 75 minutes`,
+    //         });
+    //     }
+    //     else{
+    //         min = msg[2];
+    //         if(min < 45){
+    //             message.reply({
+    //                 content:"The bot can not run more often than every 45 minutes." 
+    //             })
+    //         }
+    //         else{
+    //             clearInterval(interval);
+    //             interval = setInterval(()=>{ multiStreamChecker(message, msg, "automatic") }, 1000 * 60 * min);
+    //             message.reply({
+    //                 content:`Bot is running every ${min} minutes from now`,
+    //             })
+    //         }
+    //     }
 
-    }
+    // }
 })
 
 async function multiStreamChecker(message, msg, trigger) {
@@ -354,55 +358,54 @@ async function multiStreamChecker(message, msg, trigger) {
         await page.click("div.stream-chat-header button.fNzXyu");
         await page.waitForSelector("input.bCTkss");
 
-        page.waitForTimeout(1250)
+        page.waitForTimeout(1500)
             .then(async () => {
                 await page.focus("input.bCTkss");
                 await page.keyboard.type(msg[2]);
-                console.log("typing done");
+                // console.log("typing done");
             }).then(async () => {
                 setTimeout(async () => {
                     await page.waitForSelector("div.chat-shell__expanded");
                     let viewers = await page.$$eval('button.chat-viewers-list__button', (divs) => divs.map(div => div.textContent));
                     let predefUser = predefinedStreams[i].user.trim()
                     if (viewers.some((user) => user.toLowerCase() === predefUser.toLowerCase())) {
-                        console.log(`atleast one viewer is the same as ${predefUser}`);
+                        // console.log(`atleast one viewer is the same as ${predefUser}`);
                         predefinedStreams[i].watching = true;
                     }
                     else {
-                        console.log(`no viewers are the same as ${predefUser}`);
+                        // console.log(`no viewers are the same as ${predefUser}`);
                         predefinedStreams[i].watching = false;
                     }
                     await browser.close();
-                    console.log(viewers);
+                    // console.log(viewers);
+                    console.log(viewers, `Stream number ${i + 1} out of ${predefinedStreams.length} is ${predefinedStreams[i].url.split("/").pop()}`);
                     if (i == predefinedStreams.length - 1) {
                         console.log(predefinedStreams);
                         let statusToPrint = "";
-                        if(predefinedStreams.some((stream) => stream.watching === true)){
+                        if (predefinedStreams.some((stream) => stream.watching === true)) {
                             statusToPrint = `${predefUser} is currently watching the following streams: `;
                             predefinedStreams.forEach((item) => {
                                 if (item.watching) {
                                     statusToPrint += `${item.url}, `;
                                 }
                             })
-                            if(trigger === "manual"){
+                            if (trigger === "manual") {
                                 message.reply({
                                     content: statusToPrint,
                                 })
                             }
-                            else if(trigger === "automatic"){
+                            else if (trigger === "automatic") {
                                 message.channels.cache.get("861976278022619137").send(statusToPrint);
                             }
                         }
-                        else{
+                        else {
                             statusToPrint = `${predefUser} is currently not watching any streams`;
-                            if(trigger === "manual"){
+                            if (trigger === "manual") {
                                 message.reply({
                                     content: statusToPrint,
                                 })
                             }
                         }
-
-                        
                         running = false;
                     };
                 }, 500);
