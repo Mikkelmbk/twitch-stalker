@@ -169,6 +169,7 @@ client.on("ready", () => {
     console.log("Bot is ready");
     let msg = "!ts status yarrgen".split(" ");
     // interval = setInterval(()=>{ multiStreamChecker(client, msg, "automatic") }, 1000 * 60 * min);
+    multiStreamChecker(client, msg, "automatic");
     setInterval(() => {
         console.log("Hourly interval has started");
         multiStreamChecker(client, msg, "automatic");
@@ -341,6 +342,9 @@ async function multiStreamChecker(message, msg, trigger) {
     })
 
     for (let i = 0; i < predefinedStreams.length; i++) { // for begins
+        try {
+            
+        
         const browser = await puppeteer.launch({
             headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -410,7 +414,9 @@ async function multiStreamChecker(message, msg, trigger) {
                     };
                 }, 500);
             });
-
+        } catch (error) {
+            console.log("this is error: ",error);
+        }
     } // for ends
 }
 
