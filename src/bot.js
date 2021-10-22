@@ -358,7 +358,7 @@ async function multiStreamChecker(message, msg, trigger) {
         await page.click("div.stream-chat-header button.fNzXyu");
         await page.waitForSelector("input.bCTkss");
 
-        page.waitForTimeout(1500)
+        page.waitForTimeout(1250)
             .then(async () => {
                 await page.focus("input.bCTkss");
                 await page.keyboard.type(msg[2]);
@@ -395,7 +395,7 @@ async function multiStreamChecker(message, msg, trigger) {
                                 })
                             }
                             else if (trigger === "automatic") {
-                                message.channels.cache.get("861976278022619137").send(statusToPrint);
+                                message.channels.cache.get("750832521838592061").send(statusToPrint);
                             }
                         }
                         else {
