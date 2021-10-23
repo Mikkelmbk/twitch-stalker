@@ -399,7 +399,7 @@ async function multiStreamChecker(message, msg, trigger) {
                                 })
                             }
                             else if (trigger === "automatic") {
-                                message.channels.cache.get("861976278022619137").send(statusToPrint);
+                                message.channels.cache.get("750832521838592061").send(statusToPrint);
                             }
                         }
                         else {
@@ -411,7 +411,6 @@ async function multiStreamChecker(message, msg, trigger) {
                             }
                             if(trigger === "automatic"){
                                 message.channels.cache.get("750832521838592061").send(statusToPrint);
-                                message.channels.cache.get("750832521838592061").send(predefinedStreams);
                             }
                         }
                         running = false;
